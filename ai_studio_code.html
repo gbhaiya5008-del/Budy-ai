@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Buddy AI Robot</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Screen Container */
+    .screen-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .face-page {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .face-page.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* =========================================
+       FACE 1: STANDBY ANALOG + CALENDAR
+    ========================================= */
+    .standby-container {
+      display: flex;
+      width: 90%;
+      max-width: 900px;
+      height: 80%;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+    .analog-clock {
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .clock-face {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .dial-num {
+      position: absolute;
+      color: #ff3b30;
+      font-weight: 700;
+      font-size: 24px;
+      transform: translate(-50%, -50%);
+    }
+    .hand {
+      position: absolute;
+      bottom: 50%;
+      left: 50%;
+      transform-origin: bottom center;
+      background: #ff3b30;
+      border-radius: 4px;
+    }
+    .hour-hand { width: 6px; height: 65px; margin-left: -3px; }
+    .min-hand { width: 4px; height: 95px; margin-left: -2px; }
+    .sec-hand { width: 2px; height: 110px; margin-left: -1px; background: #ff453a; }
+    .center-dot {
+      width: 12px;
+      height: 12px;
+      background: #ff3b30;
+      border-radius: 50%;
+      position: absolute;
+      z-index: 10;
+    }
+    .calendar-box {
+      color: #ff3b30;
+      width: 320px;
+      display: flex;
+      flex-direction: column;
+    }
+    .cal-month {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .cal-today {
+      background: #ff453a;
+      color: #000;
+      border-radius: 50%;
+      font-weight: 800;
+    }
+    .battery-widget {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 55px;
+      height: 55px;
+      border: 4px solid #30d158;
+      border-radius: 50%;
+      color: #fff;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    /* =========================================
+       FACE 2: BIG BOLD DIGITAL CLOCK
+    ========================================= */
+    .digital-clock-face {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+    .big-time {
+      font-size: 28vw;
+      font-weight: 900;
+      color: #ff5e57;
+      letter-spacing: -10px;
+      line-height: 1;
+      text-shadow: 0 0 40px rgba(255, 94, 87, 0.4);
+      display: flex;
+      align-items: center;
+    }
+    .colon {
+      animation: pulse 1s infinite alternate;
+      margin: 0 5px;
+    }
+    @keyframes pulse {
+      from { opacity: 0.3; }
+      to { opacity: 1; }
+    }
+
+    /* =========================================
+       FACE 3: CUTE ROBOT FACE (BUDDY AI)
+    ========================================= */
+    .robot-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .robot-head {
+      width: 320px;
+      height: 240px;
+      background: radial-gradient(circle at 50% 30%, #202028, #050508);
+      border-radius: 120px;
+      border: 4px solid #1a1a24;
+      box-shadow: 0 0 50px rgba(0, 210, 255, 0.2), inset 0 0 20px #000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    /* Ear Headphones */
+    .robot-ear {
+      position: absolute;
+      width: 25px;
+      height: 90px;
+      background: #ff2a6d;
+      border-radius: 15px;
+      box-shadow: 0 0 25px #ff2a6d;
+    }
+    .robot-ear.left { left: -20px; }
+    .robot-ear.right { right: -20px; }
+
+    .eyes-wrap {
+      display: flex;
+      gap: 55px;
+      margin-top: 10px;
+    }
+    .eye {
+      width: 75px;
+      height: 95px;
+      background: #00e5ff;
+      border-radius: 50%;
+      box-shadow: 0 0 35px #00e5ff, 0 0 60px rgba(0, 229, 255, 0.8);
+      transition: all 0.15s ease;
+      position: relative;
+    }
+    /* Eye Blinking */
+    .eye.blink {
+      height: 6px;
+      margin-top: 45px;
+      box-shadow: 0 0 20px #00e5ff;
+    }
+    /* Eye Talking Wave */
+    .eye.talking {
+      animation: eyeTalk 0.5s infinite alternate;
+    }
+    @keyframes eyeTalk {
+      0% { transform: scaleY(1); }
+      100% { transform: scaleY(0.7); }
+    }
+
+    .robot-mouth {
+      width: 40px;
+      height: 12px;
+      border-bottom: 4px solid #00e5ff;
+      border-radius: 50%;
+      margin-top: 25px;
+      box-shadow: 0 4px 15px rgba(0, 229, 255, 0.5);
+      transition: all 0.2s;
+    }
+    .robot-mouth.talking {
+      width: 30px;
+      height: 20px;
+      border-radius: 50%;
+      background: #00e5ff;
+      animation: mouthMove 0.3s infinite alternate;
+    }
+    @keyframes mouthMove {
+      from { transform: scale(0.8); }
+      to { transform: scale(1.2); }
+    }
+
+    .ai-status {
+      margin-top: 25px;
+      font-size: 18px;
+      color: #00e5ff;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-align: center;
+    }
+
+    /* Bottom Switch Controls */
+    .bottom-nav {
+      position: absolute;
+      bottom: 15px;
+      display: flex;
+      gap: 15px;
+      z-index: 99;
+    }
+    .nav-dot {
+      width: 12px;
+      height: 12px;
+      background: #333;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .nav-dot.active {
+      background: #fff;
+      transform: scale(1.3);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="screen-container" id="screenContainer">
+    
+    <!-- 1. STANDBY ANALOG + CALENDAR -->
+    <div class="face-page active" id="face1">
+      <div class="standby-container">
+        <div class="analog-clock">
+          <div class="clock-face" id="analogFace">
+            <div class="center-dot"></div>
+            <div class="hand hour-hand" id="hrHand"></div>
+            <div class="hand min-hand" id="minHand"></div>
+            <div class="hand sec-hand" id="secHand"></div>
+          </div>
+        </div>
+
+        <div class="calendar-box">
+          <div class="cal-month" id="calMonth">NOVEMBER</div>
+          <div class="cal-grid" id="calGrid"></div>
+        </div>
+
+        <div class="battery-widget" id="battWidget">85%</div>
+      </div>
+    </div>
+
+    <!-- 2. BIG DIGITAL CLOCK -->
+    <div class="face-page" id="face2">
+      <div class="digital-clock-face">
+        <div class="big-time">
+          <span id="bigHour">12</span><span class="colon">:</span><span id="bigMin">30</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. CUTE ROBOT FACE (BUDDY AI) -->
+    <div class="face-page" id="face3">
+      <div class="robot-container" id="robotBtn">
+        <div class="robot-head">
+          <div class="robot-ear left"></div>
+          <div class="robot-ear right"></div>
+          <div class="eyes-wrap">
+            <div class="eye" id="eyeL"></div>
+            <div class="eye" id="eyeR"></div>
+          </div>
+          <div class="robot-mouth" id="mouth"></div>
+        </div>
+        <div class="ai-status" id="aiStatus">टॅप करा आणि बोला (Buddy AI)</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Navigation Dots -->
+  <div class="bottom-nav">
+    <div class="nav-dot active" onclick="switchPage(0)"></div>
+    <div class="nav-dot" onclick="switchPage(1)"></div>
+    <div class="nav-dot" onclick="switchPage(2)"></div>
+  </div>
+
+  <script>
+    let currentPage = 0;
+    const pages = document.querySelectorAll('.face-page');
+    const dots = document.querySelectorAll('.nav-dot');
+
+    function switchPage(index) {
+      pages.forEach(p => p.classList.remove('active'));
+      dots.forEach(d => d.classList.remove('active'));
+      currentPage = index;
+      pages[currentPage].classList.add('active');
+      dots[currentPage].classList.add('active');
+    }
+
+    // Touch Swipe Support
+    let touchStartX = 0;
+    window.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+    window.addEventListener('touchend', e => {
+      let touchEndX = e.changedTouches[0].clientX;
+      if (touchStartX - touchEndX > 50) {
+        switchPage((currentPage + 1) % 3);
+      } else if (touchEndX - touchStartX > 50) {
+        switchPage((currentPage + 2) % 3);
+      }
+    });
+
+    // 1. ANALOG CLOCK SETUP
+    const analogFace = document.getElementById('analogFace');
+    for (let i = 1; i <= 12; i++) {
+      let num = document.createElement('div');
+      num.className = 'dial-num';
+      num.innerText = i;
+      let angle = (i * 30) * (Math.PI / 180);
+      let r = 110;
+      num.style.left = `${140 + r * Math.sin(angle)}px`;
+      num.style.top = `${140 - r * Math.cos(angle)}px`;
+      analogFace.appendChild(num);
+    }
+
+    // 2. LIVE CLOCK UPDATES
+    function updateClocks() {
+      const now = new Date();
+      const sec = now.getSeconds();
+      const min = now.getMinutes();
+      const hr = now.getHours();
+
+      // Analog Hands
+      document.getElementById('secHand').style.transform = `rotate(${sec * 6}deg)`;
+      document.getElementById('minHand').style.transform = `rotate(${min * 6 + sec * 0.1}deg)`;
+      document.getElementById('hrHand').style.transform = `rotate(${(hr % 12) * 30 + min * 0.5}deg)`;
+
+      // Big Digital
+      document.getElementById('bigHour').innerText = String(hr).padStart(2, '0');
+      document.getElementById('bigMin').innerText = String(min).padStart(2, '0');
+    }
+    setInterval(updateClocks, 1000);
+    updateClocks();
+
+    // 3. CALENDAR GENERATOR
+    function buildCalendar() {
+      const now = new Date();
+      const months = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+      document.getElementById('calMonth').innerText = months[now.getMonth()];
+
+      const calGrid = document.getElementById('calGrid');
+      calGrid.innerHTML = '';
+      const days = ['S','M','T','W','T','F','S'];
+      days.forEach(d => {
+        let el = document.createElement('div');
+        el.innerText = d;
+        el.style.opacity = '0.6';
+        calGrid.appendChild(el);
+      });
+
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
+      const totalDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+      for (let i = 0; i < firstDay; i++) {
+        calGrid.appendChild(document.createElement('div'));
+      }
+      for (let d = 1; d <= totalDays; d++) {
+        let cell = document.createElement('div');
+        cell.innerText = d;
+        if (d === now.getDate()) cell.className = 'cal-today';
+        calGrid.appendChild(cell);
+      }
+    }
+    buildCalendar();
+
+    // 4. BATTERY LEVEL
+    if (navigator.getBattery) {
+      navigator.getBattery().then(batt => {
+        const updateBatt = () => {
+          document.getElementById('battWidget').innerText = `${Math.round(batt.level * 100)}%`;
+        };
+        updateBatt();
+        batt.addEventListener('levelchange', updateBatt);
+      });
+    }
+
+    // 5. ROBOT EYE BLINK ANIMATION
+    const eyeL = document.getElementById('eyeL');
+    const eyeR = document.getElementById('eyeR');
+    function blink() {
+      eyeL.classList.add('blink');
+      eyeR.classList.add('blink');
+      setTimeout(() => {
+        eyeL.classList.remove('blink');
+        eyeR.classList.remove('blink');
+      }, 150);
+      setTimeout(blink, Math.random() * 4000 + 2000);
+    }
+    blink();
+
+    // 6. AI VOICE ASSISTANT (STT & TTS)
+    const robotBtn = document.getElementById('robotBtn');
+    const aiStatus = document.getElementById('aiStatus');
+    const mouth = document.getElementById('mouth');
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    function speakText(text) {
+      aiStatus.innerText = text;
+      eyeL.classList.add('talking');
+      eyeR.classList.add('talking');
+      mouth.classList.add('talking');
+
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'mr-IN'; // Marathi / Indian Voice
+      utterance.rate = 1.0;
+
+      utterance.onend = () => {
+        eyeL.classList.remove('talking');
+        eyeR.classList.remove('talking');
+        mouth.classList.remove('talking');
+        aiStatus.innerText = "टॅप करा आणि बोला (Buddy AI)";
+      };
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'mr-IN'; // Marathi + Hindi/English support
+      recognition.continuous = false;
+
+      robotBtn.addEventListener('click', () => {
+        try {
+          recognition.start();
+          aiStatus.innerText = "मी ऐकतोय... बोला!";
+        } catch (e) {
+          console.log(e);
+        }
+      });
+
+      recognition.onresult = (event) => {
+        const query = event.results[0][0].transcript.toLowerCase();
+        aiStatus.innerText = `तुम्ही म्हणालात: "${query}"`;
+        
+        // Smart Local Response Logic
+        setTimeout(() => {
+          if (query.includes('वेळ') || query.includes('time')) {
+            const now = new Date();
+            speakText(`आता ${now.getHours()} वाजून ${now.getMinutes()} मिनिटे झाली आहेत.`);
+          } else if (query.includes('तारीख') || query.includes('date')) {
+            const now = new Date();
+            speakText(`आजची तारीख ${now.getDate()} आहे.`);
+          } else if (query.includes('नाव') || query.includes('name') || query.includes('कोण')) {
+            speakText("माझं नाव Buddy आहे! मी तुमचा स्वतःचा AI रोबोट असिस्टंट आहे.");
+          } else if (query.includes('कसा आहेस') || query.includes('how are you')) {
+            speakText("मी मजेत आहे! तुम्ही कसे आहात?");
+          } else {
+            speakText(`मी समजलो: ${query}. मी लवकरच ChatGPT मेंदूने याचं पूर्ण उत्तर देईन!`);
+          }
+        }, 600);
+      };
+
+      recognition.onerror = () => {
+        aiStatus.innerText = "आवाज ऐकू आला नाही, पुन्हा टॅप करा.";
+      };
+    } else {
+      robotBtn.addEventListener('click', () => {
+        speakText("नमस्कार! मी Buddy AI आहे. मी तुम्हाला कशी मदत करू?");
+      });
+    }
+  </script>
+</body>
+</html>
